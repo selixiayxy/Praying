@@ -10,39 +10,51 @@
   <!-- Hidden video feed for MediaPipe -->
   <video id="videoElement" autoplay playsinline style="display: none;"></video>
   
-  <!-- Status display -->
-  <div id="status">Loading 3D Prayer Experience...</div>
-  
-  <!-- Prayer Controls -->
-  <div id="prayer-controls">
-    <button id="prayBtn" class="control-btn">🙏 Pray</button>
-    <button id="testBtn" class="control-btn">✨ Test Effects</button>
-    
-    <div class="info-text">
-      Click "Pray" to start prayer session.<br>
-      Join hands together to activate effects! 🙏
+  <!-- Control Panel -->
+    <div id="controlPanel">
+        <input type="text" id="userInput" placeholder="Enter User ID" value="User1">
+        <button id="connectBtn" class="control-btn">🔗 Connect</button>
+        <button id="prayBtn" class="control-btn">🙏 Pray</button>
+        
+        <div class="info-text">
+            <strong>Current Mode:</strong> <span id="currentMode">Ready</span>
+        </div>
+        
+        <div class="stats">
+            <div>Circles: <span id="circleCount">0</span></div>
+            <div>Prayers: <span id="prayerCount">0</span></div>
+            <div>Stars: <span id="starCount">0</span></div>
+        </div>
     </div>
     
-    <div class="prayer-stats">
-      Total Prayers: <span id="prayer-count">0</span>
+    <!-- Status Display -->
+    <div id="status">Initializing Hand Tracking Experience...</div>
+    
+    <!-- Info Panel -->
+    <div id="infoPanel">
+        <div class="info-text"><strong>Connect Mode:</strong></div>
+        <div>• Point with index finger to draw</div>
+        <div>• Draw circles to mark your space</div>
+        <div>• Click "Save My Space" when done</div>
+        
+        <div class="info-text" style="margin-top: 15px;"><strong>Pray Mode:</strong></div>
+        <div>• Join hands together in prayer</div>
+        <div>• Hold position to activate effects</div>
+        <div>• Closer hands = smaller particles</div>
     </div>
-  </div>
-  
-  <!-- Instructions -->
-  <div id="controls">
-    <h4>How to Use:</h4>
-    <ul>
-      <li>Click "Pray" to start prayer session</li>
-      <li>Camera will activate - show both hands</li>
-      <li>Join hands together in prayer position</li>
-      <li>Hold position to activate prayer effects</li>
-      <li>Only goddess rotates and becomes particles</li>
-    </ul>
-  </div>
+
   
   <!-- Three.js container -->
-  <div id="threecontainer"></div>
+  <div id="threeContainer"></div>
 
+      <!-- 2D Drawing Overlay -->
+  <div id="drawingOverlay">
+        <canvas id="drawingCanvas"></canvas>
+  </div>
+
+     <!-- Debug Canvas for Hand Tracking Visualization -->
+  <canvas id="debugCanvas"></canvas>
+  
   <!-- External Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>

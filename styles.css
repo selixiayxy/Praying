@@ -1,12 +1,23 @@
-body {
+/* styles.css - Application Styles */
+
+* {
     margin: 0;
     padding: 0;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    font-family: 'Arial', sans-serif;
-    overflow: hidden;
+    box-sizing: border-box;
 }
 
-#threecontainer {
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    overflow: hidden;
+    color: white;
+}
+
+/* ============================================================================ */
+/* THREE.JS CONTAINER */
+/* ============================================================================ */
+
+#threeContainer {
     position: absolute;
     top: 0;
     left: 0;
@@ -15,7 +26,63 @@ body {
     z-index: 1;
 }
 
-#prayer-controls {
+/* ============================================================================ */
+/* 2D DRAWING OVERLAY */
+/* ============================================================================ */
+
+#drawingOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2;
+    pointer-events: none;
+    display: none;
+}
+
+#drawingCanvas {
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+/* ============================================================================ */
+/* VIDEO AND DEBUG CANVAS */
+/* ============================================================================ */
+
+#videoElement {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    width: 300px;
+    height: 200px;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    transform: scaleX(-1); /* Mirror the video */
+}
+
+#debugCanvas {
+    position: fixed;
+    top: 230px;
+    right: 20px;
+    z-index: 101;
+    width: 300px;
+    height: 200px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+}
+
+/* ============================================================================ */
+/* CONTROL PANEL */
+/* ============================================================================ */
+
+#controlPanel {
     position: fixed;
     top: 20px;
     left: 20px;
@@ -27,6 +94,24 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.2);
     min-width: 250px;
+}
+
+#userInput {
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 12px;
+    margin: 5px 0;
+    width: 100%;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#userInput:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
 }
 
 .control-btn {
@@ -54,22 +139,75 @@ body {
     transform: translateY(0);
 }
 
-.control-btn.prayer-active {
-    background: linear-gradient(45deg, #11998e, #38ef7d);
-    animation: pulse 2s infinite;
-}
-
 .control-btn:disabled {
     background: #666;
     cursor: not-allowed;
     transform: none;
+    opacity: 0.6;
 }
 
-@keyframes pulse {
+.control-btn.connect-active {
+    background: linear-gradient(45deg, #11998e, #38ef7d);
+    animation: connectPulse 2s infinite;
+}
+
+.control-btn.pray-active {
+    background: linear-gradient(45deg, #ffd700, #ffb347);
+    animation: prayPulse 2s infinite;
+}
+
+@keyframes connectPulse {
     0% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
     50% { box-shadow: 0 4px 25px rgba(56, 239, 125, 0.5); }
     100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
 }
+
+@keyframes prayPulse {
+    0% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+    50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 0.5); }
+    100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
+}
+
+.info-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.info-text strong {
+    color: #ffeb3b;
+}
+
+.stats {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 15px;
+    text-align: center;
+    font-size: 13px;
+}
+
+.stats div {
+    margin: 5px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stats span {
+    font-weight: bold;
+    color: #38ef7d;
+    background: rgba(56, 239, 125, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* ============================================================================ */
+/* STATUS DISPLAY */
+/* ============================================================================ */
 
 #status {
     position: fixed;
@@ -86,22 +224,40 @@ body {
     min-width: 300px;
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    max-width: 80vw;
 }
 
-#videoElement {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 100;
-    width: 300px;
-    height: 200px;
-    border-radius: 10px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
+#status.status-drawing {
+    background: rgba(255, 193, 7, 0.8);
+    color: #000;
+    border-color: #ffc107;
 }
 
-#controls {
+#status.status-praying {
+    background: rgba(255, 215, 0, 0.8);
+    color: #000;
+    border-color: #ffd700;
+    animation: statusPulse 1.5s infinite;
+}
+
+#status.status-error {
+    background: rgba(244, 67, 54, 0.8);
+    color: white;
+    border-color: #f44336;
+}
+
+@keyframes statusPulse {
+    0% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.05); }
+    100% { transform: translateX(-50%) scale(1); }
+}
+
+/* ============================================================================ */
+/* INFO PANEL */
+/* ============================================================================ */
+
+#infoPanel {
     position: fixed;
     bottom: 20px;
     right: 20px;
@@ -114,64 +270,47 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
     max-width: 300px;
     color: white;
-}
-
-#controls h4 {
-    margin: 0 0 10px 0;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 16px;
-}
-
-#controls ul {
-    margin: 0;
-    padding-left: 20px;
     font-size: 14px;
     line-height: 1.4;
 }
 
-#controls li {
+#infoPanel .info-text {
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+#infoPanel .info-text strong {
+    color: #ffeb3b;
+    display: block;
     margin-bottom: 5px;
+}
+
+#infoPanel div:not(.info-text) {
     color: rgba(255, 255, 255, 0.8);
+    margin-left: 10px;
+    margin-bottom: 3px;
 }
 
-.info-text {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 14px;
-    margin-top: 15px;
-    text-align: center;
-    line-height: 1.4;
-}
+/* ============================================================================ */
+/* RESPONSIVE DESIGN */
+/* ============================================================================ */
 
-.prayer-stats {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 12px;
-    margin-top: 10px;
-    text-align: center;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 8px;
-}
-
-#prayer-count {
-    font-weight: bold;
-    color: #38ef7d;
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
-    #prayer-controls {
+    #controlPanel {
         top: 10px;
         left: 10px;
         right: 10px;
         width: auto;
         min-width: auto;
+        padding: 15px;
     }
     
-    #controls {
+    #infoPanel {
         bottom: 10px;
         right: 10px;
         left: 10px;
         max-width: none;
+        font-size: 13px;
     }
     
     #status {
@@ -180,18 +319,102 @@ body {
         right: 10px;
         transform: none;
         min-width: auto;
+        font-size: 16px;
+        padding: 12px 20px;
     }
     
-    #videoElement {
-        top: 10px;
-        right: 10px;
-        width: 200px;
-        height: 150px;
+    #videoElement, 
+    #debugCanvas {
+        display: none !important;
+    }
+    
+    .control-btn {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+    
+    #userInput {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 10px 12px;
+    }
+    
+    .stats {
+        font-size: 12px;
     }
 }
 
-/* Animation for prayer activation */
-.prayer-active-bg {
+@media (max-width: 480px) {
+    #controlPanel {
+        padding: 12px;
+    }
+    
+    .control-btn {
+        font-size: 13px;
+        padding: 8px 16px;
+    }
+    
+    #status {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+    
+    #infoPanel {
+        font-size: 12px;
+        padding: 12px;
+    }
+}
+
+/* ============================================================================ */
+/* LOADING AND ANIMATION EFFECTS */
+/* ============================================================================ */
+
+.loading {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Loading spinner for buttons */
+.control-btn.loading::after {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-left: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ============================================================================ */
+/* MODE-SPECIFIC STYLES */
+/* ============================================================================ */
+
+/* Connect Mode Active */
+body.connect-mode {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+}
+
+body.connect-mode #drawingOverlay {
+    display: block;
+}
+
+/* Prayer Mode Active */
+body.pray-mode {
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+}
+
+body.pray-mode .prayer-active-bg {
     animation: backgroundPulse 3s ease-in-out infinite;
 }
 
@@ -204,5 +427,119 @@ body {
     }
     100% { 
         background: linear-gradient(135deg, #1e3c72, #2a5298); 
+    }
+}
+
+/* ============================================================================ */
+/* VISUAL FEEDBACK */
+/* ============================================================================ */
+
+/* Button press feedback */
+.control-btn:active {
+    transform: translateY(1px) scale(0.98);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Input focus feedback */
+#userInput:focus {
+    transform: scale(1.02);
+}
+
+/* Hover effects for info panel */
+#infoPanel:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Status message transitions */
+#status {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ============================================================================ */
+/* ACCESSIBILITY */
+/* ============================================================================ */
+
+/* Focus indicators */
+.control-btn:focus,
+#userInput:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    #controlPanel,
+    #infoPanel {
+        background: rgba(0, 0, 0, 0.9);
+        border: 2px solid white;
+    }
+    
+    .control-btn {
+        border: 2px solid white;
+    }
+    
+    #status {
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid white;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .control-btn:hover {
+        transform: none;
+    }
+}
+
+/* ============================================================================ */
+/* PRINT STYLES */
+/* ============================================================================ */
+
+@media print {
+    body {
+        background: white;
+        color: black;
+    }
+    
+    #threeContainer,
+    #drawingOverlay,
+    #videoElement,
+    #debugCanvas,
+    #controlPanel,
+    #status {
+        display: none;
+    }
+    
+    #infoPanel {
+        position: static;
+        background: white;
+        color: black;
+        border: 1px solid black;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        max-width: 100%;
+        padding: 20px;
+        margin: 20px;
     }
 }

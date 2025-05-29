@@ -15,3 +15,5 @@ aniso 0.000000
 anisor 0.000000
 map_Kd ./womb_BaseColor.png
 map_Pr ./womb_Roughness.png
+map_bump ./womb_normal.png
+disp ./womb_displace.png

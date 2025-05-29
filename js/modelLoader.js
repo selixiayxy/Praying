@@ -1,4 +1,4 @@
-// js/modelLoader.js
+// js/modelloader.js - 3D Model Loading System
 import { scene, updateStatus } from './scene.js';
 
 // Check if THREE is available
