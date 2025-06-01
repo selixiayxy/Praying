@@ -37,7 +37,7 @@ let connectState = {
         isVisible: false,
         isDrawing: false,
         config: {
-            src: 'assets/wand.png',
+            src: 'Assets/wand.png',
             width: 64,
             height: 64,
             smoothing: 0.15
@@ -48,7 +48,7 @@ let connectState = {
     stars: {
         list: [],
         config: {
-            iconSrc: 'assets/star.png',
+            iconSrc: 'Assets/star.png',
             size: 64,
             height: 1.0,
             animation: {
