@@ -5,6 +5,7 @@ import { initHandTracking, startHandTracking, stopHandTracking } from './mediapi
 import { initConnectMode, startConnectMode, stopConnectMode, updateConnectMode, getConnectStats } from './connect.js';
 import { initPrayerMode, startPrayerMode, stopPrayerMode, updatePrayer, getPrayerStats } from './prayer.js';
 import { getDataStats, downloadDataAsFile, downloadFullDataAsFile, testIntersectionCalculation } from './datamanager.js';
+import { initAudio } from './Audio.js';
 
 // ============================================================================
 // APPLICATION STATE
@@ -79,6 +80,8 @@ async function initializeApplication() {
     
     // Step 8: Show initial stats
     updateAllStats();
+
+    initAudio();
     
     // Mark as ready
     appState.initialized = true;
@@ -381,7 +384,7 @@ function exitConnectMode() {
         updateStatsDisplay();
     }
     
-    updateStatus('💾 Connect mode ended. Circles saved! ⭕');
+    updateStatus('💾 Connection saved! ');
     console.log('💾 Exited connect mode');
     
     // Show results summary
@@ -499,7 +502,7 @@ function updateModeUI() {
             
         case 'pray':
             if (prayBtn) {
-                prayBtn.textContent = '🔚 Finish Praying';
+                prayBtn.textContent = '🙏 Finish Praying';
                 prayBtn.classList.add('pray-active');
             }
             if (connectBtn) {
@@ -848,7 +851,7 @@ function createDebugPanel() {
         </div>
     `;
     
-    document.body.appendChild(debugPanel);
+   // document.body.appendChild(debugPanel);
 }
 
 function setupDebugGlobals() {

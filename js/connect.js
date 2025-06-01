@@ -1,4 +1,4 @@
-// js/connect.js - Connect Mode (Circle Drawing with Complete Star System)
+// js/connect.js - Complete Enhanced Connect Mode with Purple Circle Visualization
 import { scene, updateStatus, screenTo3D, clearObjectsByType } from './scene.js';
 import { initDataManager, addCircleData, findCircleIntersections, setCurrentUser, getAllOtherUsersCircles } from './datamanager.js';
 
@@ -38,8 +38,8 @@ let connectState = {
         isDrawing: false,
         config: {
             src: 'assets/wand.png',
-            width: 32,
-            height: 32,
+            width: 64,
+            height: 64,
             smoothing: 0.15
         }
     },
@@ -63,7 +63,18 @@ let connectState = {
                 sparkle: true
             }
         }
-    }
+    },
+    
+    // 🎨 Enhanced visualization config
+    visualization: {
+            showUserLabels: true,
+            animateCircles: true,
+            glowEffects: true,
+            statisticsEnabled: true,
+            highlightIntersections: true,
+            enhancedVisibility: true,  // NEW
+            dramaticEffects: true      // NEW
+            }
 };
 
 // ============================================================================
@@ -79,7 +90,7 @@ export function initConnectMode() {
     initCursorSystem();
     initStarSystem();
     
-    console.log('Connect mode initialized with complete star intersection system');
+    console.log('🎨 Connect mode initialized with enhanced purple circle visualization');
 }
 
 /**
@@ -104,11 +115,18 @@ export function startConnectMode(userId = 'User1') {
     // Clear previous drawing
     clearDrawingCanvas();
     
-    // Load existing circles and display them
+    // 🎨 Load existing circles with enhanced visualization
     loadAndDisplayExistingCircles();
     
-    updateStatus('Connect mode active! Point with index finger to draw circles 👉');
-    console.log('Connect mode started for user:', userId);
+    // Show statistics after a delay
+    setTimeout(() => {
+        if (connectState.visualization.statisticsEnabled) {
+            showCircleStatistics();
+        }
+    }, 1000);
+    
+    updateStatus('🔗 Connect mode active! Point with index finger to draw circles 👉');
+    console.log('🔗 Connect mode started for user:', userId);
 }
 
 /**
@@ -134,23 +152,10 @@ export function stopConnectMode() {
     // Save final data
     const results = saveCirclesData();
     
-    updateStatus('Connect mode stopped. Circles saved!');
-    console.log('Connect mode stopped');
+    updateStatus('💾 Connect mode stopped. Circles saved!');
+    console.log('💾 Connect mode stopped');
     
     return results;
-}
-
-/**
- * Load and display existing circles from JSON data
- */
-function loadAndDisplayExistingCircles() {
-    const otherUsersCircles = getAllOtherUsersCircles();
-    
-    otherUsersCircles.forEach(circleData => {
-        addExistingCircleTo3D(circleData);
-    });
-    
-    console.log(`Loaded ${otherUsersCircles.length} existing circles from other users`);
 }
 
 // ============================================================================
@@ -163,7 +168,7 @@ function loadAndDisplayExistingCircles() {
 function initCursorSystem() {
     createCursorElement();
     setupCursorEvents();
-    console.log('Cursor system initialized');
+    console.log('👆 Cursor system initialized');
 }
 
 /**
@@ -207,10 +212,10 @@ function createCursorElement() {
 function loadCursorIcon() {
     const img = new Image();
     img.onload = () => {
-        console.log('Cursor icon loaded successfully');
+        console.log('✅ Cursor icon loaded successfully');
     };
     img.onerror = () => {
-        console.warn('Could not load cursor icon, using fallback');
+        console.warn('⚠️ Could not load cursor icon, using fallback');
         createFallbackCursor();
     };
     img.src = connectState.cursor.config.src;
@@ -231,7 +236,7 @@ function createFallbackCursor() {
     `;
     
     connectState.cursor.element.innerHTML = '<div style="font-size: 20px; text-align: center; line-height: 26px;">👉</div>';
-    console.log('Fallback cursor created');
+    console.log('✅ Fallback cursor created');
 }
 
 /**
@@ -257,7 +262,7 @@ function setupCursorEvents() {
 function startCursorTracking() {
     connectState.cursor.isActive = true;
     document.body.style.cursor = 'none';
-    console.log('Cursor tracking started');
+    console.log('👆 Cursor tracking started');
 }
 
 /**
@@ -267,7 +272,7 @@ function stopCursorTracking() {
     connectState.cursor.isActive = false;
     hideCursor();
     document.body.style.cursor = 'auto';
-    console.log('Cursor tracking stopped');
+    console.log('👆 Cursor tracking stopped');
 }
 
 /**
@@ -277,7 +282,8 @@ function updateCursorPosition(x, y, isPointing = false) {
     if (!connectState.cursor.isActive || !connectState.cursor.element) return;
     
     // Convert normalized coordinates to screen coordinates
-    const screenX = x * window.innerWidth;
+    const mirroredX = 1.0 - x;  // Flip X axis
+    const screenX = mirroredX * window.innerWidth;
     const screenY = y * window.innerHeight;
     
     // Update target position
@@ -421,178 +427,12 @@ function addCursorClickEffect() {
  * Initialize star system
  */
 function initStarSystem() {
-    console.log('PNG Star system initialized');
+    console.log('⭐ PNG Star system initialized');
 }
 
-/**
- * Create PNG star at intersection point
- */
-function createPNGStar(x, z, intersectionData = {}) {
-    if (typeof THREE === 'undefined') {
-        console.error('THREE.js not available for star creation');
-        return null;
-    }
-    
-    // Create canvas for star texture
-    const canvas = document.createElement('canvas');
-    const size = connectState.stars.config.size;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    
-    // Load and draw star image
-    const img = new Image();
-    img.onload = () => {
-        // Clear canvas
-        ctx.clearRect(0, 0, size, size);
-        
-        // Draw star image
-        ctx.drawImage(img, 0, 0, size, size);
-        
-        // Update texture
-        if (starMesh && starMesh.material && starMesh.material.map) {
-            starMesh.material.map.needsUpdate = true;
-        }
-    };
-    
-    img.onerror = () => {
-        console.warn('Could not load star icon, creating fallback');
-        createFallbackStarTexture(ctx, size);
-    };
-    
-    // Create initial fallback texture
-    createFallbackStarTexture(ctx, size);
-    
-    // Create texture from canvas
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.generateMipmaps = false;
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    
-    // Create plane geometry for star sprite
-    const geometry = new THREE.PlaneGeometry(1, 1);
-    const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        transparent: true,
-        alphaTest: 0.1,
-        side: THREE.DoubleSide
-    });
-    
-    const starMesh = new THREE.Mesh(geometry, material);
-    
-    // Position star above the floor
-    starMesh.position.set(x, connectState.stars.config.height, z);
-    
-    // Always face camera
-    starMesh.lookAt(0, 10, 15); // Default camera position
-    
-    // Add metadata
-    starMesh.userData = {
-        type: 'star',
-        createdAt: Date.now(),
-        position: { x, z },
-        intersectionData: intersectionData,
-        animationOffset: Math.random() * Math.PI * 2,
-        baseY: connectState.stars.config.height,
-        pulsePhase: Math.random() * Math.PI * 2
-    };
-    
-    // Add glow effect if enabled
-    if (connectState.stars.config.effects.glow) {
-        addPNGStarGlowEffect(starMesh);
-    }
-    
-    // Add to scene
-    scene.add(starMesh);
-    connectState.stars.list.push(starMesh);
-    
-    // Add sparkle effect on creation
-    if (connectState.stars.config.effects.sparkle) {
-        addSparkleEffect(x, z);
-    }
-    
-    // Try to load the actual PNG after creating the mesh
-    img.src = connectState.stars.config.iconSrc;
-    
-    console.log('PNG star created at intersection point:', { x, z });
-    return starMesh;
-}
 
-/**
- * Create fallback star texture when PNG fails to load
- */
-function createFallbackStarTexture(ctx, size) {
-    // Clear canvas with transparent background
-    ctx.clearRect(0, 0, size, size);
-    
-    // Create gradient background
-    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
-    gradient.addColorStop(0.7, 'rgba(255, 215, 0, 0.4)');
-    gradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
-    
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-    
-    // Draw star shape
-    drawStarShape(ctx, size/2, size/2, size/3, size/6, 5);
-    
-    // Add text as final fallback
-    ctx.fillStyle = '#FFD700';
-    ctx.font = `${size/2}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('⭐', size/2, size/2);
-}
 
-/**
- * Draw star shape on canvas
- */
-function drawStarShape(ctx, x, y, outerRadius, innerRadius, points) {
-    ctx.beginPath();
-    ctx.fillStyle = '#FFD700';
-    ctx.strokeStyle = '#FFA500';
-    ctx.lineWidth = 2;
-    
-    for (let i = 0; i < points * 2; i++) {
-        const angle = (i / (points * 2)) * Math.PI * 2 - Math.PI / 2;
-        const radius = i % 2 === 0 ? outerRadius : innerRadius;
-        const pointX = x + Math.cos(angle) * radius;
-        const pointY = y + Math.sin(angle) * radius;
-        
-        if (i === 0) {
-            ctx.moveTo(pointX, pointY);
-        } else {
-            ctx.lineTo(pointX, pointY);
-        }
-    }
-    
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-}
 
-/**
- * Add glow effect to PNG star
- */
-function addPNGStarGlowEffect(star) {
-    // Create glow geometry - larger plane behind the star
-    const glowGeometry = new THREE.PlaneGeometry(1.8, 1.8);
-    const glowMaterial = new THREE.MeshBasicMaterial({
-        color: 0xFFD700,
-        transparent: true,
-        opacity: 0.3,
-        blending: THREE.AdditiveBlending,
-        side: THREE.DoubleSide
-    });
-    
-    const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
-    glowMesh.position.z = -0.05; // Slightly behind the star
-    glowMesh.userData.type = 'glow';
-    
-    // Add as child to main star
-    star.add(glowMesh);
-}
 
 /**
  * Create multiple PNG stars at intersection points
@@ -613,7 +453,7 @@ function createStarsAtIntersections(intersections) {
         });
     });
     
-    console.log(`Created ${createdStars.length} PNG stars at intersections`);
+    console.log(`⭐ Created ${createdStars.length} PNG stars at intersections`);
     return createdStars;
 }
 
@@ -700,8 +540,69 @@ function addSparkleEffect(x, z) {
     animateSparkles();
 }
 
+
 /**
- * Update star animations (called from main animation loop)
+ * Create PNG star using mesh for Y-axis rotation
+ */
+function createPNGStar(x, z, intersectionData = {}) {
+    if (typeof THREE === 'undefined') {
+        console.error('THREE.js not available for star creation');
+        return null;
+    }
+    
+    // 🎯 USE MESH for Y-axis rotation control
+    const textureLoader = new THREE.TextureLoader();
+    
+    const geometry = new THREE.PlaneGeometry(1, 1);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0xFFD700,
+        transparent: true,
+        opacity: 0.9,
+        side: THREE.DoubleSide // Important for Y-axis rotation visibility
+    });
+    
+    const starMesh = new THREE.Mesh(geometry, material);
+    starMesh.position.set(x, connectState.stars.config.height, z);
+    
+    // Add metadata
+    starMesh.userData = {
+        type: 'star',
+        createdAt: Date.now(),
+        position: { x, z },
+        intersectionData: intersectionData,
+        animationOffset: Math.random() * Math.PI * 2,
+        baseY: connectState.stars.config.height,
+        pulsePhase: Math.random() * Math.PI * 2
+    };
+    
+    // Load PNG
+    textureLoader.load(
+        connectState.stars.config.iconSrc,
+        (texture) => {
+            console.log('✅ PNG loaded for Y-axis rotation');
+            material.map = texture;
+            material.color.setHex(0xffffff);
+            material.needsUpdate = true;
+        },
+        undefined,
+        (error) => {
+            console.warn('⚠️ PNG load failed, golden star will still rotate');
+        }
+    );
+    
+    scene.add(starMesh);
+    connectState.stars.list.push(starMesh);
+    
+    if (connectState.stars.config.effects.sparkle) {
+        addSparkleEffect(x, z);
+    }
+    
+    console.log('⭐ Y-axis rotating star created');
+    return starMesh;
+}
+
+/**
+ * Update stars with Y-axis rotation
  */
 function updateStars() {
     if (!connectState.stars.config.animation.enabled) return;
@@ -714,8 +615,8 @@ function updateStars() {
         const offset = star.userData.animationOffset || 0;
         const pulsePhase = star.userData.pulsePhase || 0;
         
-        // Rotation animation
-        star.rotation.z += connectState.stars.config.animation.rotationSpeed;
+        // 🎯 Y-AXIS ROTATION: Makes star flip/tumble
+        star.rotation.x = time * connectState.stars.config.animation.rotationSpeed + offset;
         
         // Floating animation
         const baseY = star.userData.baseY || connectState.stars.config.height;
@@ -726,16 +627,12 @@ function updateStars() {
         const pulseScale = 1 + Math.sin(time * connectState.stars.config.animation.pulseSpeed + pulsePhase) * 0.2;
         star.scale.setScalar(pulseScale);
         
-        // Animate glow effect
+        // Animate glow effects
         const glowChild = star.children.find(child => child.userData.type === 'glow');
         if (glowChild) {
             const glowPulse = Math.sin(time * 2 + offset) * 0.5 + 0.5;
             glowChild.material.opacity = 0.2 + glowPulse * 0.4;
-            glowChild.rotation.z = -star.rotation.z; // Counter-rotate for effect
         }
-        
-        // Always face camera (billboard effect)
-        star.lookAt(0, 10, 15); // Default camera position
     });
 }
 
@@ -761,7 +658,161 @@ function clearAllStars() {
     });
     
     connectState.stars.list = [];
-    console.log('All PNG stars cleared');
+    console.log('⭐ All PNG stars cleared');
+}
+
+
+
+
+/**
+ * 🎨 Show circle statistics
+ */
+function showCircleStatistics() {
+    const allCircles = [];
+    const userCounts = {};
+    
+    scene.traverse(child => {
+        if (child.userData.type === 'circle') {
+            allCircles.push(child);
+            const userId = child.userData.userId;
+            userCounts[userId] = (userCounts[userId] || 0) + 1;
+        }
+    });
+    
+    console.log('📊 Circle Statistics:');
+    console.log(`Total circles: ${allCircles.length}`);
+    console.log('Per user:', userCounts);
+    
+    // Update status with statistics
+    const totalUsers = Object.keys(userCounts).length;
+    updateStatus(`📊 ${allCircles.length} circles from ${totalUsers} users displayed`);
+}
+
+// ============================================================================
+// 🎨 DEBUG AND VISUALIZATION CONTROLS
+// ============================================================================
+
+/**
+ * Toggle user labels visibility
+ */
+function toggleUserLabels() {
+    connectState.visualization.showUserLabels = !connectState.visualization.showUserLabels;
+    
+    scene.traverse(child => {
+        if (child.userData.type === 'circle' && child.userData.isExisting) {
+            const label = child.children.find(c => c.userData.type === 'label');
+            if (label) {
+                label.visible = connectState.visualization.showUserLabels;
+            }
+        }
+    });
+    
+    console.log(`🎨 User labels ${connectState.visualization.showUserLabels ? 'enabled' : 'disabled'}`);
+    updateStatus(`User labels ${connectState.visualization.showUserLabels ? 'ON' : 'OFF'}`);
+}
+
+/**
+ * Toggle glow effects
+ */
+function toggleGlowEffects() {
+    connectState.visualization.glowEffects = !connectState.visualization.glowEffects;
+    
+    scene.traverse(child => {
+        if (child.userData.type === 'circle' && child.userData.isExisting) {
+            const glow = child.children.find(c => c.userData.type === 'glow');
+            if (glow) {
+                glow.visible = connectState.visualization.glowEffects;
+            }
+        }
+    });
+    
+    console.log(`🎨 Glow effects ${connectState.visualization.glowEffects ? 'enabled' : 'disabled'}`);
+    updateStatus(`Glow effects ${connectState.visualization.glowEffects ? 'ON' : 'OFF'}`);
+}
+
+/**
+ * Highlight circles from specific user
+ */
+function highlightUserCircles(userId) {
+    scene.traverse(child => {
+        if (child.userData.type === 'circle') {
+            if (child.userData.userId === userId) {
+                // Highlight this user's circles
+                child.material.opacity = 1.0;
+                child.scale.setScalar(1.2);
+                
+                // Add highlight glow
+                const highlightGlow = child.children.find(c => c.userData.type === 'highlight');
+                if (!highlightGlow) {
+                    addHighlightEffect(child);
+                }
+            } else {
+                // Dim other circles
+                child.material.opacity = 0.3;
+                child.scale.setScalar(0.8);
+                
+                // Remove highlight if exists
+                const highlightGlow = child.children.find(c => c.userData.type === 'highlight');
+                if (highlightGlow) {
+                    child.remove(highlightGlow);
+                }
+            }
+        }
+    });
+    
+    console.log(`🎯 Highlighted circles for user: ${userId}`);
+    updateStatus(`Highlighting ${userId}'s circles`);
+}
+
+/**
+ * Add highlight effect to a circle
+ */
+function addHighlightEffect(circle) {
+    const highlightGeometry = new THREE.RingGeometry(
+        circle.geometry.parameters.innerRadius * 0.5,
+        circle.geometry.parameters.outerRadius * 1.5,
+        32
+    );
+    
+    const highlightMaterial = new THREE.MeshBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.4,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+    });
+    
+    const highlight = new THREE.Mesh(highlightGeometry, highlightMaterial);
+    highlight.rotation.x = -Math.PI / 2;
+    highlight.position.y = 0.02;
+    highlight.userData = { type: 'highlight' };
+    
+    circle.add(highlight);
+}
+
+/**
+ * Reset all circle highlighting
+ */
+function resetCircleHighlighting() {
+    scene.traverse(child => {
+        if (child.userData.type === 'circle') {
+            if (child.userData.isExisting) {
+                child.material.opacity = 0.7;
+            } else {
+                child.material.opacity = 0.7; // User's own circles
+            }
+            child.scale.setScalar(1.0);
+            
+            // Remove highlight effects
+            const highlightChild = child.children.find(c => c.userData.type === 'highlight');
+            if (highlightChild) {
+                child.remove(highlightChild);
+            }
+        }
+    });
+    
+    console.log('🎨 Circle highlighting reset');
+    updateStatus('Circle highlighting reset');
 }
 
 // ============================================================================
@@ -781,6 +832,16 @@ function setupDrawingCanvas() {
     connectState.drawingCanvas = canvas;
     connectState.drawingCtx = canvas.getContext('2d');
     
+      canvas.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 500;
+        background: transparent;
+    `;
     // Set canvas size to match window
     resizeDrawingCanvas();
     
@@ -796,6 +857,9 @@ function setupDrawingCanvas() {
     window.addEventListener('resize', resizeDrawingCanvas);
 }
 
+
+
+
 /**
  * Resize drawing canvas to match window
  */
@@ -805,6 +869,8 @@ function resizeDrawingCanvas() {
     connectState.drawingCanvas.width = window.innerWidth;
     connectState.drawingCanvas.height = window.innerHeight;
     
+
+
     // Reapply drawing context settings
     if (connectState.drawingCtx) {
         const ctx = connectState.drawingCtx;
@@ -813,7 +879,10 @@ function resizeDrawingCanvas() {
         ctx.lineWidth = 3;
         ctx.strokeStyle = '#ffeb3b';
         ctx.globalAlpha = 0.8;
+        ctx.shadowColor = '#ffeb3b';  // Yellow glow
+        ctx.shadowBlur = 10;         // Glowing effect
     }
+       
 }
 
 /**
@@ -849,8 +918,9 @@ export function processConnectHandResults(results) {
     if (results.pointingGesture && results.pointingGesture.isPointing) {
         const indexTip = results.pointingGesture.indexTip;
         
+        const mirroredX = 1.0 - indexTip.x;
         // Convert normalized coordinates to screen coordinates
-        const screenX = indexTip.x * window.innerWidth;
+        const screenX = mirroredX* window.innerWidth;
         const screenY = indexTip.y * window.innerHeight;
         
         addDrawingPoint(screenX, screenY);
@@ -893,7 +963,7 @@ function startDrawing(x, y) {
     // Add cursor click effect
     addCursorClickEffect();
     
-    updateStatus('Drawing circle... ✏️');
+    updateStatus('✏️ Drawing circle...');
 }
 
 /**
@@ -990,23 +1060,23 @@ function finishDrawing() {
         // Create PNG stars at intersection points
         if (intersections.length > 0) {
             createStarsAtIntersections(intersections);
-            updateStatus(`Circle added! Found ${intersections.length} intersections ⭐`);
+            updateStatus(`⭐ Circle added! Found ${intersections.length} intersections`);
         } else {
-            updateStatus('Circle detected and added! ⭕');
+            updateStatus('⭕ Circle detected and added!');
         }
         
         // Update stats
         updateStats();
         
     } else {
-        updateStatus('Shape not recognized as circle. Try drawing a more circular shape! 🔄');
+        updateStatus('🔄 Shape not recognized as circle. Try drawing a more circular shape!');
     }
     
     // Clear drawing canvas after a delay
     setTimeout(() => {
         clearDrawingCanvas();
         if (connectState.isActive) {
-            updateStatus('Ready to draw next circle! 👉');
+            updateStatus('👉 Ready to draw next circle!');
         }
     }, 1500);
 }
@@ -1049,10 +1119,50 @@ function smoothPath(path) {
 /**
  * Detect if the drawn path represents a circle
  */
+/*
 function detectCircle(path) {
-    if (path.length < connectState.minCirclePoints) return null;
+    if (path.length < 3) return null;
     
-    // Calculate bounding box
+    // Find center point (average of all points)
+    let sumX = 0, sumY = 0;
+    path.forEach(p => { sumX += p.x; sumY += p.y; });
+    const centerX = sumX / path.length;
+    const centerY = sumY / path.length;
+    
+    // Find average distance from center (this becomes radius)
+    let sumDist = 0;
+    path.forEach(p => {
+        sumDist += Math.sqrt(Math.pow(p.x - centerX, 2) + Math.pow(p.y - centerY, 2));
+    });
+    const avgRadius = sumDist / path.length;
+    
+    // Convert to world coordinates
+    const worldCoords = screenTo3D(centerX, centerY, window.innerWidth, window.innerHeight);
+    const edgeCoords = screenTo3D(centerX + avgRadius, centerY, window.innerWidth, window.innerHeight);
+    const worldRadius = Math.sqrt(
+        Math.pow(edgeCoords.x - worldCoords.x, 2) + 
+        Math.pow(edgeCoords.z - worldCoords.z, 2)
+    );
+    
+    console.log('✅ Any scribble → circle!', { 
+        points: path.length, 
+        radius: Math.max(0.2, Math.min(worldRadius, 4)).toFixed(2) 
+    });
+    
+    return {
+        x: worldCoords.x,
+        z: worldCoords.z,
+        radius: Math.max(0.2, Math.min(worldRadius, 4)),
+        userId: connectState.currentUserId,
+        timestamp: new Date().toISOString()
+    };
+}
+    */
+
+function detectCircle(path) {
+    if (path.length < 3) return null;
+    
+    // 🎯 IMPROVED: Use bounding box for better size differentiation
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     path.forEach(point => {
         minX = Math.min(minX, point.x);
@@ -1061,69 +1171,39 @@ function detectCircle(path) {
         maxY = Math.max(maxY, point.y);
     });
     
-    const width = maxX - minX;
-    const height = maxY - minY;
-    const aspectRatio = width / height;
-    
-    // Check if roughly square (circular bounding box)
-    if (aspectRatio < 0.7 || aspectRatio > 1.4) {
-        console.log('Circle detection failed: aspect ratio', aspectRatio);
-        return null;
-    }
-    
-    // Calculate center and radius
-    const centerX = (minX + maxX) / 2;
+     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
-    const radius = Math.max(width, height) / 2;
+    const screenRadius = Math.max(maxX - minX, maxY - minY) / 2;
     
-    // Check if points roughly follow circular path
-    const circularityScore = calculateCircularity(path, centerX, centerY, radius);
+    // Use your existing screenTo3D function
+    const originalWorld = screenTo3D(centerX, centerY, window.innerWidth, window.innerHeight);
     
-    if (circularityScore < connectState.circleDetectionThreshold) {
-        console.log('Circle detection failed: circularity score', circularityScore);
-        return null;
-    }
+    // 🎯 SPREAD THEM OUT: Multiply coordinates by spread factor
+    const spreadFactor = 2.0;  // 3x wider distribution!
     
-    // Convert screen coordinates to 3D world coordinates
-    const worldCoords = screenTo3D(centerX, centerY, window.innerWidth, window.innerHeight);
+    const worldX = originalWorld.x * spreadFactor;
+    const worldZ = originalWorld.z * spreadFactor;
     
-    // Scale radius for 3D world
-    const worldRadius = (radius / Math.min(window.innerWidth, window.innerHeight)) * 10;
+    // Calculate radius with the new spread
+    const originalEdge = screenTo3D(centerX + screenRadius, centerY, window.innerWidth, window.innerHeight);
+    const worldRadius = Math.sqrt(
+        Math.pow(originalEdge.x * spreadFactor - worldX, 2) + 
+        Math.pow(originalEdge.z * spreadFactor - worldZ, 2)
+    );
+    
+    const finalRadius = Math.max(0.1, Math.min(worldRadius, 5));
     
     return {
-        x: worldCoords.x,
-        z: worldCoords.z, // Note: using z instead of y for floor plane
-        radius: Math.max(0.5, Math.min(worldRadius, 3)), // Clamp radius
+        x: worldX,
+        z: worldZ,
+        radius: finalRadius,
         userId: connectState.currentUserId,
         timestamp: new Date().toISOString()
     };
 }
 
-/**
- * Calculate how circular a path is (0 = not circular, 1 = perfect circle)
- */
-function calculateCircularity(path, centerX, centerY, expectedRadius) {
-    if (path.length === 0) return 0;
-    
-    let totalDeviation = 0;
-    let validPoints = 0;
-    
-    path.forEach(point => {
-        const distance = Math.sqrt(
-            Math.pow(point.x - centerX, 2) + 
-            Math.pow(point.y - centerY, 2)
-        );
-        
-        const deviation = Math.abs(distance - expectedRadius) / expectedRadius;
-        totalDeviation += deviation;
-        validPoints++;
-    });
-    
-    const averageDeviation = totalDeviation / validPoints;
-    const circularityScore = Math.max(0, 1 - averageDeviation);
-    
-    return circularityScore;
-}
+
+
 
 // ============================================================================
 // 3D CIRCLE MANAGEMENT
@@ -1147,7 +1227,7 @@ function addCircleTo3D(circleData) {
     
     const ring = new THREE.Mesh(geometry, material);
     ring.rotation.x = -Math.PI / 2; // Lay flat on floor
-    ring.position.set(circleData.x, 0, circleData.z);
+    ring.position.set(circleData.x, 2, circleData.z);
     
     // Add metadata
     ring.userData = {
@@ -1162,48 +1242,7 @@ function addCircleTo3D(circleData) {
     ring.receiveShadow = true;
     scene.add(ring);
     
-    console.log('Yellow circle added to 3D scene for current user:', circleData);
-}
-
-/**
- * Add existing circle from other users to 3D scene
- */
-function addExistingCircleTo3D(circleData) {
-    const innerRadius = Math.max(0.1, circleData.radius - 0.1);
-    const outerRadius = circleData.radius + 0.1;
-    
-    const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 32);
-    
-    // Convert hex color string to THREE.Color
-    let color = 0x8866ff; // Default purple
-    if (circleData.color && circleData.color.startsWith('#')) {
-        color = parseInt(circleData.color.substring(1), 16);
-    }
-    
-    const material = new THREE.MeshBasicMaterial({
-        color: color,
-        transparent: true,
-        opacity: 0.5, // More transparent for other users
-        side: THREE.DoubleSide
-    });
-    
-    const ring = new THREE.Mesh(geometry, material);
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(circleData.x, 0, circleData.z);
-    
-    ring.userData = {
-        type: 'circle',
-        userId: circleData.userId,
-        circleId: circleData.id,
-        circleData: circleData,
-        isExisting: true
-    };
-    
-    ring.castShadow = true;
-    ring.receiveShadow = true;
-    scene.add(ring);
-    
-    console.log('Existing circle added to 3D scene:', circleData);
+    console.log('🟡 Yellow circle added to 3D scene for current user:', circleData);
 }
 
 // ============================================================================
@@ -1216,6 +1255,9 @@ function addExistingCircleTo3D(circleData) {
 export function updateConnectMode() {
     // Update star animations
     updateStars();
+    
+    // 🎨 Update circle animations
+    updateExistingCircleAnimations();
 }
 
 /**
@@ -1223,7 +1265,7 @@ export function updateConnectMode() {
  */
 function updateStats() {
     // This would update the UI stats - can be called from main.js
-    console.log('Stats updated - circles and intersections');
+    console.log('📊 Stats updated - circles and intersections');
 }
 
 /**
@@ -1239,6 +1281,322 @@ function saveCirclesData() {
     };
     
     return results;
+}
+
+// Enhanced Purple Circle Visualization - Replace these functions in connect.js
+
+/**
+ * 🎨 Enhanced function to load and display existing circles with MORE OBVIOUS visualization
+ */
+function loadAndDisplayExistingCircles() {
+    const otherUsersCircles = getAllOtherUsersCircles();
+    
+    if (otherUsersCircles.length === 0) {
+        console.log('No existing circles found in JSON data');
+        updateStatus('No existing circles to display - add data to sample_circle_data.json');
+        return;
+    }
+    
+    console.log(`🎨 Loading ${otherUsersCircles.length} existing circles with ENHANCED OBVIOUS visualization`);
+    
+    // Show immediate status
+    updateStatus(`🔄 Loading ${otherUsersCircles.length} circles from JSON data...`);
+    
+    otherUsersCircles.forEach((circleData, index) => {
+        // Add delay for dramatic loading animation
+        setTimeout(() => {
+            addExistingCircleTo3D(circleData);
+            
+            // Add spawn effect
+            addCircleSpawnEffect(circleData.x, circleData.z, circleData.userId);
+            
+            // Show progress with sound-like feedback
+            const progress = Math.round(((index + 1) / otherUsersCircles.length) * 100);
+            updateStatus(`🔄 Loading circles... ${progress}% (${index + 1}/${otherUsersCircles.length})`);
+            
+            // Final completion message
+            if (index === otherUsersCircles.length - 1) {
+                setTimeout(() => {
+                    updateStatus(`✨ ${otherUsersCircles.length} circles loaded! Start drawing to find intersections!`);
+                    showCircleStatistics();
+                    
+                    // Add dramatic completion effect
+                    addCompletionEffect();
+                }, 200);
+            }
+        }, index * 200); // 200ms delay between each circle for dramatic effect
+    });
+}
+
+/**
+ * 🎨 SUPER ENHANCED function to add existing circles with MAXIMUM visibility
+ */
+function addExistingCircleTo3D(circleData) {
+    const innerRadius = Math.max(0.1, circleData.radius - 0.1);
+    const outerRadius = circleData.radius + 0.1;
+
+    let color = 0xff0000;
+    
+    const geometry = new THREE.RingGeometry(innerRadius, outerRadius, 32);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0xff0000, // Yellow for current user
+        transparent: true,
+        opacity: 0.7,
+        side: THREE.DoubleSide
+    });
+    
+    const ring = new THREE.Mesh(geometry, material);
+    ring.rotation.x = -Math.PI / 2; // Lay flat on floor
+    ring.position.set(circleData.x, 0, circleData.z);
+
+
+
+    
+    
+    // 🎨 Add MULTIPLE visual effects for maximum impact
+  //  addEnhancedCircleGlowEffect(ring, color);
+    addSimpleGlowEffect(ring,color);
+  
+  
+  
+    
+    ring.userData = {
+        type: 'circle',
+        userId: circleData.userId,
+        circleId: circleData.id,
+        circleData: circleData,
+        isExisting: true,
+        color: color,
+        spawnTime: Date.now()
+    };
+    
+    ring.castShadow = true;
+    ring.receiveShadow = true;
+    scene.add(ring);
+    
+    console.log(`🎨 SUPER ENHANCED circle added for ${circleData.userId}:`, {
+        position: `(${circleData.x}, ${circleData.z})`,
+        radius: circleData.radius,
+        color: `#${color.toString(16).padStart(6, '0')}`,
+        enhanced: true
+    });
+}
+
+
+
+/**
+ * 🎨 Get MORE DISTINCTIVE colors for different users
+ */
+function getUserVisualizationColor(userId) {
+    const userColors = {
+        'Alice': 0xff3366,    // Bright Pink-Red
+        'Bob': 0x33ff99,      // Bright Teal-Green
+        'Charlie': 0x3366ff,  // Bright Blue
+        'Diana': 0xffcc33,    // Bright Gold
+        'Eve': 0xff6633,      // Bright Orange
+        'Frank': 0xff3333,    // Bright Red
+        'Grace': 0x9933ff,    // Bright Purple
+        'Henry': 0xcc33ff,    // Bright Magenta
+        'Iris': 0x33ff33,     // Bright Green
+        'Jack': 0xff33cc      // Bright Pink
+    };
+    
+    // If user has predefined color, use it
+    if (userColors[userId]) {
+        return userColors[userId];
+    }
+    
+    // Generate BRIGHT color based on username hash
+    let hash = 0;
+    for (let i = 0; i < userId.length; i++) {
+        hash = userId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Generate bright, saturated colors
+    const hue = Math.abs(hash) % 360;
+    const saturation = 80 + (Math.abs(hash >> 8) % 20); // 80-100% saturation
+    const lightness = 50 + (Math.abs(hash >> 16) % 30);  // 50-80% lightness
+    
+    return hslToHex(hue, saturation, lightness);
+}
+
+/**
+ * Convert HSL to HEX color
+ */
+function hslToHex(h, s, l) {
+    l /= 100;
+    const a = s * Math.min(l, 1 - l) / 100;
+    const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color);
+    };
+    const r = f(0);
+    const g = f(8);
+    const b = f(4);
+    return (r << 16) | (g << 8) | b;
+}
+
+
+function addSimpleGlowEffect(ring, color) {
+    const glowGeometry = new THREE.RingGeometry(
+        ring.geometry.parameters.innerRadius * 0.95,  // 🎚️ INNER: 0.8 → 0.9 (thinner inside)
+        ring.geometry.parameters.outerRadius * 1.,  // 🎚️ OUTER: 1.4 → 1.2 (thinner outside)
+        32
+    );
+    
+    const glowMaterial = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 0.25,  // 🎚️ OPACITY: 0.3 → 0.25 (slightly more transparent)
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+    });
+    
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    glow.position.y = 0.01;
+    glow.userData = { type: 'simpleGlow' };
+    ring.add(glow);
+}
+
+
+/**
+ * 🎨 Add dramatic spawn effect when circle appears
+ */
+function addCircleSpawnEffect(x, z, userId) {
+    // Create expanding ring effect
+    const spawnGeometry = new THREE.RingGeometry(0.1, 0.2, 32);
+    const spawnMaterial = new THREE.MeshBasicMaterial({
+        color: getUserVisualizationColor(userId),
+        transparent: true,
+        opacity: 1.0,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+    });
+    
+    const spawnRing = new THREE.Mesh(spawnGeometry, spawnMaterial);
+    spawnRing.position.set(x, 0.1, z);
+    spawnRing.rotation.x = -Math.PI / 2;
+    
+    scene.add(spawnRing);
+    
+    // Animate the spawn effect
+    let scale = 0.1;
+    let opacity = 1.0;
+    
+    function animateSpawn() {
+        scale += 0.1;
+        opacity -= 0.05;
+        
+        spawnRing.scale.setScalar(scale);
+        spawnMaterial.opacity = opacity;
+        
+        if (opacity > 0) {
+            requestAnimationFrame(animateSpawn);
+        } else {
+            scene.remove(spawnRing);
+            spawnGeometry.dispose();
+            spawnMaterial.dispose();
+        }
+    }
+    
+    animateSpawn();
+}
+
+/**
+ * 🎨 Add completion effect when all circles are loaded
+ */
+function addCompletionEffect() {
+    // Create screen flash effect
+    const flash = document.createElement('div');
+    flash.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, rgba(255,215,0,0) 70%);
+        pointer-events: none;
+        z-index: 1500;
+        animation: flashEffect 1s ease-out forwards;
+    `;
+    
+    // Add flash animation if not exists
+    if (!document.getElementById('flash-styles')) {
+        const style = document.createElement('style');
+        style.id = 'flash-styles';
+        style.textContent = `
+            @keyframes flashEffect {
+                0% { opacity: 0; }
+                50% { opacity: 1; }
+                100% { opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(flash);
+    
+    // Remove flash after animation
+    setTimeout(() => {
+        if (flash.parentNode) {
+            flash.parentNode.removeChild(flash);
+        }
+    }, 1000);
+}
+
+/**
+ * 🎨 ENHANCED circle animations with MORE dramatic effects
+ */
+function updateExistingCircleAnimations() {
+    if (!connectState.visualization.animateCircles) return;
+    
+    const time = Date.now() * 0.001;
+    
+    scene.traverse(child => {
+        if (child.userData.type === 'circle' && child.userData.isExisting) {
+            const spawnTime = child.userData.spawnTime || 0;
+            const age = (Date.now() - spawnTime) * 0.001; // Age in seconds
+            
+            // ENHANCED pulsing animation
+            const pulse = Math.sin(time * 0.8 + child.userData.circleId.length) * 0.1 + 1;
+            child.scale.setScalar(pulse);
+            
+            // Enhanced glow animations
+            const innerGlow = child.children.find(c => c.userData.type === 'innerGlow');
+            if (innerGlow) {
+                const glowPulse = Math.sin(time * 0.5) * 0.5 + 0.5;
+                innerGlow.material.opacity = 0.3 + glowPulse * 0.4;
+                innerGlow.rotation.z = time * 0.1;
+            }
+            
+            const outerGlow = child.children.find(c => c.userData.type === 'outerGlow');
+            if (outerGlow) {
+                const outerPulse = Math.sin(time * 0.3) * 0.5 + 0.5;
+                outerGlow.material.opacity = 0.1 + outerPulse * 0.3;
+                outerGlow.rotation.z = -time * 0.05;
+            }
+            
+            // ENHANCED pulsing border
+            const border = child.children.find(c => c.userData.type === 'pulsingBorder');
+            if (border) {
+                const borderPulse = Math.sin(time * 2) * 0.5 + 0.5;
+                border.material.opacity = 0.4 + borderPulse * 0.6;
+                border.scale.setScalar(1 + borderPulse * 0.1);
+            }
+            
+            // ENHANCED label animation
+            const label = child.children.find(c => c.userData.type === 'label');
+            if (label) {
+                // Always face camera
+                label.lookAt(0, 10, 15);
+                // MORE dramatic floating
+                label.position.y = 2.5 + Math.sin(time * 0.7 + age) * 0.3;
+                // Add slight rotation
+                label.rotation.z = Math.sin(time * 0.3) * 0.1;
+            }
+        }
+    });
 }
 
 /**
@@ -1270,7 +1628,7 @@ export function clearUserCircles(userId) {
     // Remove from data
     delete connectState.userCircles[userId];
     
-    console.log(`Cleared circles for user: ${userId}`);
+    console.log(`🗑️ Cleared circles for user: ${userId}`);
 }
 
 /**
@@ -1297,8 +1655,20 @@ export function cleanupConnectMode() {
     // Clear all stars
     clearAllStars();
     
-    console.log('Connect mode cleaned up');
+    console.log('🧹 Connect mode cleaned up');
 }
+
+// ============================================================================
+// 🎨 ENHANCED DEBUG FUNCTIONS (for main.js integration)
+// ============================================================================
+
+export const debugFunctions = {
+    toggleLabels: toggleUserLabels,
+    toggleGlow: toggleGlowEffects,
+    highlightUser: highlightUserCircles,
+    resetHighlight: resetCircleHighlighting,
+    showStats: showCircleStatistics
+};
 
 // Export state for debugging
 export { connectState };

@@ -168,6 +168,8 @@ body {
     100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); }
 }
 
+
+
 .info-text {
     color: rgba(255, 255, 255, 0.9);
     font-size: 14px;
@@ -259,7 +261,7 @@ body {
 
 #infoPanel {
     position: fixed;
-    bottom: 20px;
+    top: 20px;
     right: 20px;
     z-index: 100;
     background: rgba(255, 255, 255, 0.1);

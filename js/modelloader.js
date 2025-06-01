@@ -15,16 +15,16 @@ export let goddessMesh = null;
 
 const MODEL_CONFIGS = {
   goddess: {
-    position: { x: 0, y: -3, z: 0 },
-    rotation: { x: 0, y: 0.7, z: 0 },
-    scale: { x: 1.5, y: 1.5, z: 1.5 },
+    position: { x: 0, y: -2.0, z: 0 },
+    rotation: { x: 0, y: 0.5, z: 0 },
+    scale: { x: 2.0, y: 2.0, z: 2.0 },
     autoRotate: false,        // Static initially - only rotates during prayer
     canBecomeParticles: true // Only goddess becomes particles
   },
   altar: {
-    position: { x: 0, y: -2, z: 0 },
+    position: { x: 0, y: -1.0, z: -1.0 },
     rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: 1.5, y: 1.5, z: 1.5 },
+    scale: { x: 1.7, y: 1.7, z: 1.7 },
     autoRotate: false,       // Static model
     canBecomeParticles: false // Cannot become particles
   },
@@ -34,6 +34,14 @@ const MODEL_CONFIGS = {
     scale: { x: 5, y: 5, z: 5 },
     autoRotate: false,       // Static model
     canBecomeParticles: false // Cannot become particles
+  },
+  floor:{
+    position: { x: 0, y: 0, z: 0 },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 10, y: 2, z: 10 },
+    autoRotate: false,       // Static model
+    canBecomeParticles: false // Cannot become particles
+
   }
 };
 
@@ -73,7 +81,7 @@ function loadRealModels() {
     return;
   }
 
-  const modelNames = ['goddess', 'altar', 'roof'];
+  const modelNames = ['goddess', 'altar', 'roof','floor'];
   let loadedCount = 0;
   const totalModels = modelNames.length;
   

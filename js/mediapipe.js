@@ -82,6 +82,9 @@ function setupDebugCanvas() {
     debugCanvas.width = 640;
     debugCanvas.height = 480;
     debugCtx = debugCanvas.getContext('2d');
+
+        // 🪞 ENABLE MIRRORING
+    debugCanvas.style.transform = 'scaleX(-1)';
 }
 
 /**

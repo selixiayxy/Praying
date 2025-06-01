@@ -6,7 +6,7 @@ import { updateStatus } from './scene.js';
 // ============================================================================
 
 const DATA_CONFIG = {
-    filename: './circle_data.json',
+    filename: ['./js/circle_data.json'],
     autoSave: true,
     saveInterval: 3000, // Auto-save every 3 seconds
     backupInterval: 30000 // Backup every 30 seconds

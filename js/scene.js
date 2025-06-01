@@ -25,7 +25,7 @@ export function initScene(containerId = 'threeContainer') {
     
     // Camera - positioned for both circle drawing and prayer viewing
     const aspect = container.clientWidth / container.clientHeight;
-    camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(80, aspect, 0.1, 1000);
     camera.position.set(0, 10, 15);
     camera.lookAt(0, 0, 0);
     
@@ -59,7 +59,7 @@ export function initScene(containerId = 'threeContainer') {
  */
 function setupLighting() {
     // Ambient light
-    const ambient = new THREE.AmbientLight(0x404040, 0.4);
+    const ambient = new THREE.AmbientLight(0x554433, 0.4);
     scene.add(ambient);
     
     // Main directional light
@@ -94,13 +94,14 @@ function setupLighting() {
 /**
  * Create floor plane for circle drawing
  */
+
 function createFloor() {
     // Floor plane
-    const floorGeo = new THREE.PlaneGeometry(20, 20);
+    const floorGeo = new THREE.PlaneGeometry(40, 40);
     const floorMat = new THREE.MeshLambertMaterial({ 
         color: 0x2c3e50, 
         transparent: true, 
-        opacity: 0.8 
+        opacity: 0
     });
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
@@ -108,10 +109,12 @@ function createFloor() {
     floor.userData = { type: 'floor' };
     scene.add(floor);
     
+    /*
     // Grid helper
     const grid = new THREE.GridHelper(20, 40, 0x444444, 0x444444);
     grid.userData = { type: 'grid' };
     scene.add(grid);
+    */
 }
 
 /**
